@@ -18,55 +18,72 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="flex min-h-screen">
-            <Sidebar />
-            <div className="flex-1 p-6">
-                <div className="overflow-x-auto">
-                    <table className="table-auto w-full text-left border-collapse">
-                        <thead>
-                            <tr>
-                                <th className="p-4 border-b-2">Transaction #</th>
-                                <th className="p-4 border-b-2">Status</th>
-                                <th className="p-4 border-b-2">Date & Time</th>
-                                <th className="p-4 border-b-2 hidden sm:table-cell">Number</th>
-                                <th className="p-4 border-b-2 hidden sm:table-cell">Pin</th>
-                                <th className="p-4 border-b-2">Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {transactions.map((transaction) => (
-                                <tr key={transaction.id} >
-                                    <td onClick={() => handleTransactionClick(transaction)} className="cursor-pointer p-4 border-b underline">{transaction.id}</td>
-                                    <td className="p-4 border-b">{transaction.status}</td>
-                                    <td className="p-4 border-b">{transaction.dateTime}</td>
-                                    <td className="p-4 border-b hidden sm:table-cell">{transaction.number}</td>
-                                    <td className="p-4 border-b hidden sm:table-cell">{transaction.pin}</td>
-                                    <td className="p-4 border-b">${transaction.price}</td>
+        <>
+            <div className="flex min-h-screen">
+                <Sidebar />
+                <div className="flex-1 p-6">
+                    <div className="overflow-x-auto">
+                        <table className="table-auto w-full text-left border-collapse">
+                            <thead>
+                                <tr>
+                                    <th className="p-4 border-b-2">Transaction #</th>
+                                    <th className="p-4 border-b-2">Status</th>
+                                    <th className="p-4 border-b-2">Date & Time</th>
+                                    <th className="p-4 border-b-2 hidden sm:table-cell">Number</th>
+                                    <th className="p-4 border-b-2 hidden sm:table-cell">Pin</th>
+                                    <th className="p-4 border-b-2">Price</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {modalOpen && (
-                <div className="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center bg-black bg-opacity-50">
-                    <div className="rounded-lg p-8 max-w-md">
-                        <h2 className="text-lg font-semibold mb-4">Transaction Details</h2>
-                        {selectedTransaction && (
-                            <div>
-                                <p><strong>Transaction #:</strong> {selectedTransaction.id}</p>
-                                <p><strong>Status:</strong> {selectedTransaction.status}</p>
-                                <p><strong>Date & Time:</strong> {selectedTransaction.dateTime}</p>
-                                <p><strong>Number:</strong> {selectedTransaction.number}</p>
-                                <p><strong>Pin:</strong> {selectedTransaction.pin}</p>
-                                <p><strong>Price:</strong> ${selectedTransaction.price}</p>
-                            </div>
-                        )}
-                        <button className="mt-4 text-sm text-gray-600 hover:text-gray-800" onClick={() => setModalOpen(false)}>Close</button>
+                            </thead>
+                            <tbody>
+                                {transactions.map((transaction) => (
+                                    <tr key={transaction.id} >
+                                        <td onClick={() => handleTransactionClick(transaction)} className="cursor-pointer p-4 border-b underline">{transaction.id}</td>
+                                        <td className="p-4 border-b">{transaction.status}</td>
+                                        <td className="p-4 border-b">{transaction.dateTime}</td>
+                                        <td className="p-4 border-b hidden sm:table-cell">{transaction.number}</td>
+                                        <td className="p-4 border-b hidden sm:table-cell">{transaction.pin}</td>
+                                        <td className="p-4 border-b">${transaction.price}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            )}
-        </div>
+                {modalOpen && (
+                    <div className="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center bg-black bg-opacity-50">
+                        <div className="rounded-lg p-8 max-w-md">
+                            {selectedTransaction && (
+                                <div className="modal-box rounded-lg p-8 max-w-2xl w-full mx-auto my-12 md:my-0 md:mr-12 md:ml-auto border border-gray-300">
+                                    <h2 className="text-xl text-center font-semibold mb-4">Transaction Details</h2>
+                                    <form>
+                                        <div className="grid grid-cols-2 gap-x-4 text-lg">
+                                            <div className="font-semibold">
+                                                <div className="border-b border-gray-300 mb-2 pb-2"><strong>Transaction #:</strong></div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2"><strong>Status:</strong></div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2"><strong>Date & Time:</strong></div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2"><strong>Number:</strong></div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2"><strong>Pin:</strong></div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2"><strong>Price:</strong></div>
+                                            </div>
+                                            <div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.id}</div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.status}</div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.dateTime}</div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.number}</div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.pin}</div>
+                                                <div className="border-b border-gray-300 mb-2 pb-2">${selectedTransaction.price}</div>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => setModalOpen(false)} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                                    </form>
+                                </div>
+
+
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div></>
     );
 };
 
