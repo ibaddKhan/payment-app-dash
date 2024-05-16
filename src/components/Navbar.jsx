@@ -9,6 +9,9 @@ const Navbar = () => {
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
+    const handleLogout = () => {
+        console.log("logout working");
+    };
     return (
         <div className="navbar border-b  border-slate-600	">
             <div className="flex-1 ml-5">
@@ -16,6 +19,9 @@ const Navbar = () => {
             </div>
             <div className="flex-none font-bold space-x-6 mr-10 hidden sm:block">
                 <Link className=" hover:text-purple-300 text-lg font-normal	" to={'/profile'}>Profile</Link>
+                <button onClick={handleLogout} className="hover:text-purple-300 text-lg font-normal">
+                    Logout
+                </button>
             </div>
             <label className="swap swap-rotate mr-5">
 
@@ -36,6 +42,11 @@ const Navbar = () => {
                             <Link to={'/profile'} className="hover:text-purple-300 text-lg font-normal">
                                 Profile
                             </Link>
+                        </li>
+                        <li>
+                            <button onClick={handleLogout} className="hover:text-purple-300 text-lg font-normal">
+                                Logout
+                            </button>
                         </li>
 
                     </ul>
