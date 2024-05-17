@@ -5,11 +5,46 @@ const Dashboard = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [newStatus, setNewStatus] = useState("");
+    const [filterOption, setFilterOption] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [transactionsPerPage] = useState(10);
+
     const [transactions, setTransactions] = useState([
-        { id: "001", status: "Active", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 100 },
-        { id: "002", status: "Inactive", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 200 },
-        { id: "003", status: "Pending", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 150 },
-        { id: "004", status: "Completed", dateTime: "2024-05-14 16:20", number: "33445", pin: "6677", price: 250 }
+        { id: "001", status: "Completed", dateTime: "2024-05-14 16:20", number: "33445", pin: "6677", price: 250 },
+        { id: "002", status: "Pending", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 100 },
+        { id: "003", status: "Rejected", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 200 },
+        { id: "004", status: "Pending", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 150 },
+        { id: "005", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 100 },
+        { id: "006", status: "Pending", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 200 },
+        { id: "007", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 100 },
+        { id: "008", status: "Rejected", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 150 },
+        { id: "009", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 100 },
+        { id: "010", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "011", status: "Pending", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 300 },
+        { id: "012", status: "Rejected", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 200 },
+        { id: "013", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "014", status: "Pending", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 300 },
+        { id: "015", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "016", status: "Rejected", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 200 },
+        { id: "017", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "018", status: "Pending", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 300 },
+        { id: "019", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "020", status: "Rejected", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 200 },
+        { id: "021", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "022", status: "Pending", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 300 },
+        { id: "023", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "024", status: "Rejected", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 200 },
+        { id: "025", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "026", status: "Pending", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 300 },
+        { id: "027", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "028", status: "Rejected", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 200 },
+        { id: "029", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "030", status: "Pending", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 300 },
+        { id: "031", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "032", status: "Rejected", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 200 },
+        { id: "033", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
+        { id: "034", status: "Pending", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 300 },
+        { id: "035", status: "Completed", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 150 },
     ]);
 
     const handleTransactionClick = (transaction) => {
@@ -34,12 +69,39 @@ const Dashboard = () => {
         }
     };
 
+    const handleFilterChange = (e) => {
+        setFilterOption(e.target.value);
+        setCurrentPage(1); // Reset current page when filter changes
+    };
+
+    const filteredTransactions = filterOption ? transactions.filter(transaction => transaction.status === filterOption) : transactions;
+
+    // Pagination
+    const indexOfLastTransaction = currentPage * transactionsPerPage;
+    const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
+    const currentTransactions = filteredTransactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    const nextPage = () => setCurrentPage(currentPage + 1);
+
+    const prevPage = () => setCurrentPage(currentPage - 1);
+
     return (
         <>
             <div className="flex min-h-screen">
                 <Sidebar />
                 <div className="flex-1 p-6">
                     <div className="overflow-x-auto">
+                        <div className="mb-4">
+                            <label htmlFor="filter" className="mr-2">Filter By Status:</label>
+                            <select id="filter" value={filterOption} onChange={handleFilterChange} className="border border-gray-300 rounded px-2 py-1">
+                                <option value="">All</option>
+                                <option value="Rejected">Rejected</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
                         <table className="table-auto w-full text-left border-collapse">
                             <thead>
                                 <tr>
@@ -52,7 +114,7 @@ const Dashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactions.map((transaction) => (
+                                {currentTransactions.map((transaction) => (
                                     <tr key={transaction.id} >
                                         <td onClick={() => handleTransactionClick(transaction)} className="cursor-pointer p-4 border-b underline">{transaction.id}</td>
                                         <td className="p-4 border-b">{transaction.status}</td>
@@ -64,6 +126,14 @@ const Dashboard = () => {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    <div className="flex justify-between mt-4">
+                        <button onClick={prevPage} disabled={currentPage === 1} className="btn btn-sm">Previous</button>
+                        <div>
+                            Page {currentPage} of {Math.ceil(filteredTransactions.length / transactionsPerPage)}
+                        </div>
+                        <button onClick={nextPage} disabled={currentPage === Math.ceil(filteredTransactions.length / transactionsPerPage)} className="btn btn-sm">Next</button>
                     </div>
                 </div>
                 {modalOpen && (
