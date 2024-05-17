@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+
 import Hamburger from 'hamburger-react'
 import { useState } from "react";
 
@@ -18,7 +18,6 @@ const Navbar = () => {
                 <img src="https://www.payboostbills.com/static/media/pbblogo.2781af64db3db9d44aa5.png" className="w-20" alt="" />
             </div>
             <div className="flex-none font-bold space-x-6 mr-10 hidden sm:block">
-                <Link className=" hover:text-purple-300 text-lg font-normal	" to={'/profile'}>Profile</Link>
                 <button onClick={handleLogout} className="hover:text-purple-300 text-lg font-normal">
                     Logout
                 </button>
@@ -38,11 +37,7 @@ const Navbar = () => {
                 </div>
                 {isOpen && (
                     <ul className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box absolute right-0 w-52">
-                        <li>
-                            <Link to={'/profile'} className="hover:text-purple-300 text-lg font-normal">
-                                Profile
-                            </Link>
-                        </li>
+
                         <li>
                             <button onClick={handleLogout} className="hover:text-purple-300 text-lg font-normal">
                                 Logout

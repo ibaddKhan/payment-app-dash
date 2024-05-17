@@ -1,22 +1,43 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Dashboard from '../../screens/home/home'
-import Profile from '../../screens/profile/profile'
-import Login from '../../screens/login/login'
-import Forget from '../../screens/forget/forget'
-import Navbar from '../../components/Navbar'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import Dashboard from '../../screens/home/home';
+import Navbar from '../../components/Navbar';
+import Login from '../../screens/login/login';
+import ForgetPassword from '../../screens/forget/forget';
 
 const Routers = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(true);
+
     return (
-        <>
-            <BrowserRouter>
-                <Routes>
-                    <Route path='/login' element={<Login />} />
-                    <Route path='/' element={<Navbar><Dashboard /></Navbar>} />
-                    <Route path='/profile' element={<Navbar><Profile /></Navbar>} />
-                    <Route path='/ForgetPassword' element={<Forget />} />
-                </Routes>
-            </BrowserRouter >
-        </>
-    )
-}
-export default Routers
+        <BrowserRouter>
+            {isAuthenticated && <Navbar />}
+            <Routes>
+                <Route
+                    path='/login'
+                    element={
+                        isAuthenticated ? <Navigate to="/dashboard" /> : <Login setIsAuthenticated={setIsAuthenticated} />
+                    }
+                />
+                {isAuthenticated ? (
+                    <Route path='/' element={<Navigate to="/dashboard" />} />
+                ) : (
+                    null
+                )}
+                {isAuthenticated ? (
+                    <Route path='/dashboard' element={<Dashboard />} />
+                ) : (
+                    <Route path='/dashboard' element={<Navigate to="/login" />} />
+                )}
+                {isAuthenticated ? (
+                    <Route path='/login' element={<Navigate to="/dashboard" />} />
+                ) : (
+                    <Route path='/login' element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+                )}
+                {!isAuthenticated && <Route path='/forgetPassword' element={<ForgetPassword />} />}
+                <Route path="*" element={<Navigate to="/login" />} />
+            </Routes>
+        </BrowserRouter>
+    );
+};
+
+export default Routers;

@@ -1,8 +1,6 @@
 /** @format */
 import { useState } from "react";
 import {
-    FaTachometerAlt,
-    FaCog,
     FaChevronRight,
     FaChevronLeft,
 } from "react-icons/fa";
@@ -59,12 +57,7 @@ const Sidebar = () => {
                             title: "Dashboard",
                             href: "/",
                             icon: LuLayoutGrid,
-                        },
-                        {
-                            title: "Sidebar",
-                            href: "/profile",
-                            icon: FaCog,
-                        },
+                        }
                     ]}
                     toggleSidebar={toggleSidebar}
                 />

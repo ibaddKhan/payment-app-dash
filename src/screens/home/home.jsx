@@ -4,17 +4,34 @@ import Sidebar from "../../components/Sidebar";
 const Dashboard = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
-
-    const transactions = [
+    const [newStatus, setNewStatus] = useState("");
+    const [transactions, setTransactions] = useState([
         { id: "001", status: "Active", dateTime: "2024-05-17 14:32", number: "12345", pin: "6789", price: 100 },
         { id: "002", status: "Inactive", dateTime: "2024-05-16 10:15", number: "54321", pin: "9876", price: 200 },
         { id: "003", status: "Pending", dateTime: "2024-05-15 08:45", number: "11223", pin: "4455", price: 150 },
         { id: "004", status: "Completed", dateTime: "2024-05-14 16:20", number: "33445", pin: "6677", price: 250 }
-    ];
+    ]);
 
     const handleTransactionClick = (transaction) => {
         setSelectedTransaction(transaction);
         setModalOpen(true);
+    };
+
+    const handleStatusChange = (e) => {
+        setNewStatus(e.target.value);
+    };
+
+    const handleStatusUpdate = () => {
+        if (newStatus !== "") {
+            const updatedTransactions = [...transactions];
+            const index = updatedTransactions.findIndex(transaction => transaction.id === selectedTransaction.id);
+
+            updatedTransactions[index].status = newStatus;
+            setTransactions(updatedTransactions);
+            setModalOpen(false);
+        } else {
+            console.log("Please select a new status.");
+        }
     };
 
     return (
@@ -55,7 +72,7 @@ const Dashboard = () => {
                             {selectedTransaction && (
                                 <div className="modal-box rounded-lg p-8 max-w-2xl w-full mx-auto my-12 md:my-0 md:mr-12 md:ml-auto border border-gray-300">
                                     <h2 className="text-xl text-center font-semibold mb-4">Transaction Details</h2>
-                                    <form>
+                                    <form onSubmit={handleStatusUpdate}>
                                         <div className="grid grid-cols-2 gap-x-4 text-lg">
                                             <div className="font-semibold">
                                                 <div className="border-b border-gray-300 mb-2 pb-2"><strong>Transaction #:</strong></div>
@@ -74,16 +91,25 @@ const Dashboard = () => {
                                                 <div className="border-b border-gray-300 mb-2 pb-2">${selectedTransaction.price}</div>
                                             </div>
                                         </div>
+                                        <div className="flex justify-center mt-4">
+                                            <label htmlFor="status" className="mr-2">New Status:</label>
+                                            <select id="status" value={newStatus} onChange={handleStatusChange} className="border border-gray-300 rounded px-2 py-1">
+                                                <option value="">Select Status</option>
+                                                <option value="Rejected">Rejected</option>
+                                                <option value="Pending">Pending</option>
+                                                <option value="Completed">Completed</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" className="btn btn-primary mt-4">Update Status</button>
                                         <button onClick={() => setModalOpen(false)} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
                                 </div>
-
-
                             )}
                         </div>
                     </div>
                 )}
-            </div></>
+            </div>
+        </>
     );
 };
 
