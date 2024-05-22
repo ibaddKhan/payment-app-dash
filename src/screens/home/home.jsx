@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../config/firebaseconfig";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
   collection,
   getDocs,
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [searchNumber, setSearchNumber] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [transactionsPerPage] = useState(10);
+  const [isLoading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,7 +60,7 @@ const Dashboard = () => {
           orderBy("postDate", "desc")
         );
         const querySnapshot = await getDocs(q);
-
+        setLoading(false);
         const transactionsData = [];
         let index = 1;
         querySnapshot.forEach((doc) => {
@@ -91,6 +93,14 @@ const Dashboard = () => {
         await updateDoc(transactionRef, {
           status: newStatus,
         });
+        await Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Status updated",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+
         const updatedTransactions = transactions.map((transaction) => {
           if (transaction.docId === selectedTransaction.docId) {
             return { ...transaction, status: newStatus };
@@ -101,6 +111,13 @@ const Dashboard = () => {
         setModalOpen(false);
       } catch (error) {
         console.error("Error updating status:", error);
+        await Swal.fire({
+          position: "center",
+          icon: "error",
+          title: "An error occurred",
+          showConfirmButton: false,
+          timer: 1500,
+        });
       }
     } else {
       console.log("Please select a new status.");
@@ -198,43 +215,70 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="table-container">
-              <table className="table-auto w-full text-left border-collapse">
-                <thead>
-                  <tr>
-                    <th className="p-4 border-b-2">Transaction#</th>
-                    <th className="p-4 border-b-2">Status</th>
-                    <th className="p-4 border-b-2">Date & Time</th>
-                    <th className="p-4 border-b-2 hidden sm:table-cell">
-                      Number
-                    </th>
-                    <th className="p-4 border-b-2 hidden sm:table-cell">Pin</th>
-                    <th className="p-4 border-b-2">Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentTransactions.map((transaction, index) => (
-                    <tr key={index}>
-                      <td
-                        onClick={() =>
-                          handleTransactionClick(transaction, transaction.docId)
-                        }
-                        className="cursor-pointer p-4 border-b underline"
-                      >
-                        {transaction.id}
-                      </td>
-                      <td className="p-4 border-b">{transaction.status}</td>
-                      <td className="p-4 border-b">{transaction.dateTime}</td>
-                      <td className="p-4 border-b hidden sm:table-cell">
-                        {transaction.number}
-                      </td>
-                      <td className="p-4 border-b hidden sm:table-cell">
-                        {transaction.pin}
-                      </td>
-                      <td className="p-4 border-b">${transaction.price}</td>
+              {isLoading ? ( // Render loading indicator if data is still loading
+                <div className="flex justify-center my-20">
+                  <div className="p-3 animate-spin drop-shadow-2xl bg-gradient-to-bl from-pink-400 via-purple-400 to-indigo-600 md:w-32 md:h-32 h-24 w-24 aspect-square rounded-full">
+                    <div className="rounded-full h-full w-full bg-base-100 background-blur-md"></div>
+                  </div>
+                </div>
+              ) : (
+                <table className="table-auto w-full text-left border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="p-4 border-b-2">Transaction#</th>
+                      <th className="p-4 border-b-2">Status</th>
+                      <th className="p-4 border-b-2">Date & Time</th>
+                      <th className="p-4 border-b-2 hidden sm:table-cell">
+                        Number
+                      </th>
+                      <th className="p-4 border-b-2 hidden sm:table-cell">
+                        Pin
+                      </th>
+                      <th className="p-4 border-b-2">Price</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {currentTransactions.map((transaction, index) => (
+                      <tr key={index}>
+                        <td
+                          onClick={() =>
+                            handleTransactionClick(
+                              transaction,
+                              transaction.docId
+                            )
+                          }
+                          className="cursor-pointer p-4 border-b underline"
+                        >
+                          {transaction.id}
+                        </td>
+                        <td
+                          className={`p-4 border-b ${
+                            transaction.status === "Rejected"
+                              ? "text-red-500"
+                              : transaction.status === "Completed"
+                              ? "text-green-500"
+                              : "text-yellow-500"
+                          }`}
+                        >
+                          {transaction.status}
+                        </td>
+
+                        <td className="p-4 border-b">{transaction.dateTime}</td>
+                        <td className="p-4 border-b hidden sm:table-cell">
+                          {transaction.number}
+                        </td>
+                        <td className="p-4 border-b hidden sm:table-cell">
+                          {transaction.pin}
+                        </td>
+                        <td className="p-4 font-bold border-b">
+                          ${transaction.price}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
           <div className="flex justify-between mt-4">
