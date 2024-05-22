@@ -3,6 +3,7 @@ import { useState } from "react";
 import { auth } from ".././config/firebaseconfig.js";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import Logo from "../assets/logo.png";
 import Swal from "sweetalert2";
 
 const Navbar = () => {
@@ -26,11 +27,7 @@ const Navbar = () => {
   return (
     <div className="navbar border-b w-full border-slate-600	">
       <div className="flex-1 ml-5">
-        <img
-          src="https://www.payboostbills.com/static/media/pbblogo.2781af64db3db9d44aa5.png"
-          className="w-20"
-          alt=""
-        />
+        <img src={Logo} className="w-20" alt="" />
       </div>
       <div className="flex-none font-bold space-x-6 mr-10 hidden sm:block">
         <button
