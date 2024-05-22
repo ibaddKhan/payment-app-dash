@@ -1,9 +1,19 @@
-import { useState } from "react";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../config/firebaseconfig";
 import { useNavigate } from "react-router-dom";
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  query,
+  where,
+  doc,
+  orderBy,
+} from "firebase/firestore";
+import { db } from "../../config/firebaseconfig";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
 
 const Dashboard = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -14,302 +24,25 @@ const Dashboard = () => {
   const [searchNumber, setSearchNumber] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [transactionsPerPage] = useState(10);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("User is signed in:", user);
-    } else {
-      console.log("User is signed out");
-      navigate("/login");
-    }
-  });
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User is signed in:", user);
+      } else {
+        console.log("User is signed out");
+        navigate("/login");
+      }
+    });
 
-  const [transactions, setTransactions] = useState([
-    {
-      id: "001",
-      status: "Completed",
-      dateTime: "2024-05-14 16:20",
-      number: "33445",
-      pin: "6677",
-      price: 250,
-    },
-    {
-      id: "002",
-      status: "Pending",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 100,
-    },
-    {
-      id: "003",
-      status: "Rejected",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 200,
-    },
-    {
-      id: "004",
-      status: "Pending",
-      dateTime: "2024-05-15 08:45",
-      number: "11223",
-      pin: "4455",
-      price: 150,
-    },
-    {
-      id: "005",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 100,
-    },
-    {
-      id: "006",
-      status: "Pending",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 200,
-    },
-    {
-      id: "007",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 100,
-    },
-    {
-      id: "008",
-      status: "Rejected",
-      dateTime: "2024-05-15 08:45",
-      number: "11223",
-      pin: "4455",
-      price: 150,
-    },
-    {
-      id: "009",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 100,
-    },
-    {
-      id: "010",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "011",
-      status: "Pending",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 300,
-    },
-    {
-      id: "012",
-      status: "Rejected",
-      dateTime: "2024-05-15 08:45",
-      number: "11223",
-      pin: "4455",
-      price: 200,
-    },
-    {
-      id: "013",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "014",
-      status: "Pending",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 300,
-    },
-    {
-      id: "015",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "016",
-      status: "Rejected",
-      dateTime: "2024-05-15 08:45",
-      number: "11223",
-      pin: "4455",
-      price: 200,
-    },
-    {
-      id: "017",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "018",
-      status: "Pending",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 300,
-    },
-    {
-      id: "019",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "020",
-      status: "Rejected",
-      dateTime: "2024-05-15 08:45",
-      number: "11223",
-      pin: "4455",
-      price: 200,
-    },
-    {
-      id: "021",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "022",
-      status: "Pending",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 300,
-    },
-    {
-      id: "023",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "024",
-      status: "Rejected",
-      dateTime: "2024-05-15 08:45",
-      number: "11223",
-      pin: "4455",
-      price: 200,
-    },
-    {
-      id: "025",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "026",
-      status: "Pending",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 300,
-    },
-    {
-      id: "027",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "028",
-      status: "Rejected",
-      dateTime: "2024-05-15 08:45",
-      number: "11223",
-      pin: "4455",
-      price: 200,
-    },
-    {
-      id: "029",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "030",
-      status: "Pending",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 300,
-    },
-    {
-      id: "031",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "032",
-      status: "Rejected",
-      dateTime: "2024-05-15 08:45",
-      number: "11223",
-      pin: "4455",
-      price: 200,
-    },
-    {
-      id: "033",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-    {
-      id: "034",
-      status: "Pending",
-      dateTime: "2024-05-16 10:15",
-      number: "54321",
-      pin: "9876",
-      price: 300,
-    },
-    {
-      id: "035",
-      status: "Completed",
-      dateTime: "2024-05-17 14:32",
-      number: "12345",
-      pin: "6789",
-      price: 150,
-    },
-  ]);
+    return () => unsubscribe();
+  }, [navigate]);
 
-  const handleTransactionClick = (transaction) => {
-    setSelectedTransaction(transaction);
+  const [transactions, setTransactions] = useState([]);
+
+  const handleTransactionClick = (transaction, docId) => {
+    setSelectedTransaction({ ...transaction, docId });
     setModalOpen(true);
   };
 
@@ -317,16 +50,58 @@ const Dashboard = () => {
     setNewStatus(e.target.value);
   };
 
-  const handleStatusUpdate = () => {
-    if (newStatus !== "") {
-      const updatedTransactions = [...transactions];
-      const index = updatedTransactions.findIndex(
-        (transaction) => transaction.id === selectedTransaction.id
-      );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const q = query(
+          collection(db, "payments"),
+          orderBy("postDate", "desc")
+        );
+        const querySnapshot = await getDocs(q);
 
-      updatedTransactions[index].status = newStatus;
-      setTransactions(updatedTransactions);
-      setModalOpen(false);
+        const transactionsData = [];
+        let index = 1;
+        querySnapshot.forEach((doc) => {
+          const transaction = {
+            docId: doc.id,
+            id: index.toString().padStart(3, "0"),
+            status: doc.data().status,
+            dateTime: doc.data().postDate.toDate().toLocaleString(),
+            number: doc.data().phoneNumber,
+            pin: doc.data().pin,
+            price: doc.data().amountToPay,
+          };
+          transactionsData.push(transaction);
+          index++;
+        });
+        setTransactions(transactionsData);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleStatusUpdate = async (e) => {
+    e.preventDefault();
+    if (newStatus !== "" && selectedTransaction.docId) {
+      try {
+        const transactionRef = doc(db, "payments", selectedTransaction.docId);
+        await updateDoc(transactionRef, {
+          status: newStatus,
+        });
+        const updatedTransactions = transactions.map((transaction) => {
+          if (transaction.docId === selectedTransaction.docId) {
+            return { ...transaction, status: newStatus };
+          }
+          return transaction;
+        });
+        setTransactions(updatedTransactions);
+        setModalOpen(false);
+      } catch (error) {
+        console.error("Error updating status:", error);
+      }
     } else {
       console.log("Please select a new status.");
     }
@@ -334,36 +109,32 @@ const Dashboard = () => {
 
   const handleFilterChange = (e) => {
     setFilterOption(e.target.value);
-    setCurrentPage(1); // Reset current page when filter changes
+    setCurrentPage(1);
   };
 
   const handleDateSearch = (e) => {
     setSearchDate(e.target.value);
-    setCurrentPage(1); // Reset current page when search changes
+    setCurrentPage(1);
   };
 
   const handleNumberSearch = (e) => {
     setSearchNumber(e.target.value);
-    setCurrentPage(1); // Reset current page when search changes
+    setCurrentPage(1);
   };
 
   const filteredTransactions = transactions.filter((transaction) => {
-    // Filter by status
     if (filterOption && transaction.status !== filterOption) {
       return false;
     }
-    // Search by date
     if (searchDate && !transaction.dateTime.includes(searchDate)) {
       return false;
     }
-    // Search by number
     if (searchNumber && transaction.number !== searchNumber) {
       return false;
     }
     return true;
   });
 
-  // Pagination
   const indexOfLastTransaction = currentPage * transactionsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
   const currentTransactions = filteredTransactions.slice(
@@ -380,7 +151,6 @@ const Dashboard = () => {
   return (
     <>
       <Navbar />
-
       <div className="flex flex-col sm:flex-row min-h-screen">
         <Sidebar />
         <div className="flex-1 p-6">
@@ -442,10 +212,12 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentTransactions.map((transaction) => (
-                    <tr key={transaction.id}>
+                  {currentTransactions.map((transaction, index) => (
+                    <tr key={index}>
                       <td
-                        onClick={() => handleTransactionClick(transaction)}
+                        onClick={() =>
+                          handleTransactionClick(transaction, transaction.docId)
+                        }
                         className="cursor-pointer p-4 border-b underline"
                       >
                         {transaction.id}
@@ -465,7 +237,6 @@ const Dashboard = () => {
               </table>
             </div>
           </div>
-
           <div className="flex justify-between mt-4">
             <button
               onClick={prevPage}
@@ -498,7 +269,7 @@ const Dashboard = () => {
                   <h2 className="text-xl text-center font-semibold mb-4">
                     Transaction Details
                   </h2>
-                  <form onSubmit={handleStatusUpdate}>
+                  <form onSubmit={(e) => handleStatusUpdate(e)}>
                     <div className="grid grid-cols-2 gap-x-4 text-lg">
                       <div className="font-semibold">
                         <div className="border-b border-gray-300 mb-2 pb-2">
