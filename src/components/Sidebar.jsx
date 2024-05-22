@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
-import { LuLayoutGrid } from "react-icons/lu";
+import { LuLayoutGrid, LuCircleDollarSign } from "react-icons/lu";
 
 import { useWindowWidth } from "@react-hook/window-size";
 import { Link } from "react-router-dom";
@@ -13,9 +13,8 @@ const Button = ({ onClick, children, className }) => (
 
 const Nav = ({ isCollapsed, links, toggleSidebar }) => (
   <nav
-    className={`relative flex flex-col ${
-      isCollapsed ? "w-16" : "w-64"
-    } transition-all duration-300`}
+    className={`relative flex flex-col ${isCollapsed ? "w-16" : "w-64"
+      } transition-all duration-300`}
   >
     <div className="flex justify-end p-2">
       <Button onClick={toggleSidebar} className="rounded-full bg-gray-200 mr-2">
@@ -52,11 +51,10 @@ const Sidebar = () => {
     <>
       {mobileWidth ? null : (
         <div
-          className={`relative flex min-h-screen${
-            isCollapsed ? "w-16" : "w-64"
-          } transition-all duration-300`}
+          className={`relative flex min-h-screen${isCollapsed ? "w-16" : "w-64"
+            } transition-all duration-300`}
         >
-          <div className="flex flex-col border-r px-3 pb-10 pt-6">
+          <div className="flex flex-col border-r h-full px-3 pb-10 pt-6">
             <Nav
               isCollapsed={isCollapsed}
               links={[
@@ -64,6 +62,11 @@ const Sidebar = () => {
                   title: "Dashboard",
                   href: "/",
                   icon: LuLayoutGrid,
+                },
+                {
+                  title: "Transactions",
+                  href: "/transactions",
+                  icon: LuCircleDollarSign,
                 },
               ]}
               toggleSidebar={toggleSidebar}

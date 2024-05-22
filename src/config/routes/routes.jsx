@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "../../screens/home/home";
 import Login from "../../screens/login/login";
 import Forget from "../../screens/forget/forget";
+import Transactions from "../../screens/alltranasctions/transactions";
 
 const Routers = () => {
   return (
@@ -14,6 +15,7 @@ const Routers = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/ForgetPassword" element={<Forget />} />
+          <Route path="/transactions" element={<Transactions />} />
         </Routes>
       </BrowserRouter>
     </>
