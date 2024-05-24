@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../config/firebaseconfig";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import {
   query,
   orderBy,
   doc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../../config/firebaseconfig";
 import Sidebar from "../../components/Sidebar";
@@ -17,11 +18,14 @@ import Navbar from "../../components/Navbar";
 
 const Dashboard = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [newStatus, setNewStatus] = useState("");
+  const [newNote, setNewNote] = useState("");
   const [filterOption, setFilterOption] = useState("");
   const [searchDate, setSearchDate] = useState("");
   const [searchNumber, setSearchNumber] = useState("");
+  const [searchTransactionId, setSearchTransactionId] = useState(""); // New state for transactionId search
   const [currentPage, setCurrentPage] = useState(1);
   const [transactionsPerPage] = useState(10);
   const [isLoading, setLoading] = useState(true);
@@ -50,6 +54,16 @@ const Dashboard = () => {
     setNewStatus(e.target.value);
   };
 
+  const handleNoteChange = (e) => {
+    setNewNote(e.target.value);
+  };
+
+  const handleTransactionIdSearch = (e) => {
+    const trimmedValue = e.target.value.replace(/\s+/g, ''); // Remove whitespaces
+    setSearchTransactionId(trimmedValue);
+    setCurrentPage(1);
+  };
+
   const calculateAndUpdateTotalAmount = (transactionsData) => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -73,7 +87,8 @@ const Dashboard = () => {
       const querySnapshot = await getDocs(q);
       setLoading(false);
       const transactionsData = [];
-      let index = 1;
+      let index = querySnapshot.size;
+
       querySnapshot.forEach((doc) => {
         const transaction = {
           docId: doc.id,
@@ -82,10 +97,12 @@ const Dashboard = () => {
           dateTime: doc.data().postDate.toDate().toLocaleString(),
           number: doc.data().phoneNumber,
           pin: doc.data().pin,
+          transactionId: doc.data().transactionId,
           price: doc.data().amountToPay,
+          notes: doc.data().notes || [],
         };
         transactionsData.push(transaction);
-        index++;
+        index--;
       });
       setTransactions(transactionsData);
 
@@ -138,6 +155,44 @@ const Dashboard = () => {
     }
   };
 
+  const handleNoteSubmit = async (e) => {
+    e.preventDefault();
+    if (newNote !== "" && selectedTransaction.docId) {
+      try {
+        const transactionRef = doc(db, "payments", selectedTransaction.docId);
+        const updatedNotes = [...(selectedTransaction.notes || []), newNote];
+        await updateDoc(transactionRef, { notes: updatedNotes });
+        await Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Note added",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+
+        const updatedTransactions = transactions.map((transaction) => {
+          if (transaction.docId === selectedTransaction.docId) {
+            return { ...transaction, notes: updatedNotes };
+          }
+          return transaction;
+        });
+        setTransactions(updatedTransactions);
+        setNewNote("");
+      } catch (error) {
+        console.error("Error adding note:", error);
+        await Swal.fire({
+          position: "center",
+          icon: "error",
+          title: "An error occurred",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+    } else {
+      console.log("Please enter a note.");
+    }
+  };
+
   const handleFilterChange = (e) => {
     setFilterOption(e.target.value);
     setCurrentPage(1);
@@ -154,6 +209,49 @@ const Dashboard = () => {
     setCurrentPage(1);
   };
 
+  const handleCheckboxChange = (e, transactionId) => {
+    if (e.target.checked) {
+      setSelectedTransactionIds([...selectedTransactionIds, transactionId]);
+    } else {
+      setSelectedTransactionIds(selectedTransactionIds.filter(id => id !== transactionId));
+    }
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const allTransactionIds = transactions.map(transaction => transaction.docId);
+      setSelectedTransactionIds(allTransactionIds);
+    } else {
+      setSelectedTransactionIds([]);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    try {
+      await Promise.all(selectedTransactionIds.map(async (docId) => {
+        await deleteDoc(doc(db, "payments", docId));
+      }));
+      await Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Selected transactions deleted",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      fetchData();
+      setSelectedTransactionIds([]);
+    } catch (error) {
+      console.error("Error deleting transactions:", error);
+      await Swal.fire({
+        position: "center",
+        icon: "error",
+        title: "An error occurred",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+  };
+
   const filteredTransactions = transactions.filter((transaction) => {
     if (filterOption && transaction.status !== filterOption) {
       return false;
@@ -162,6 +260,9 @@ const Dashboard = () => {
       return false;
     }
     if (searchNumber && transaction.number !== searchNumber) {
+      return false;
+    }
+    if (searchTransactionId && !transaction.transactionId.includes(searchTransactionId)) { // Filter by transactionId
       return false;
     }
     return true;
@@ -187,7 +288,8 @@ const Dashboard = () => {
         <Sidebar />
         <div className="flex-1 p-6">
           <div className="overflow-x-auto">
-            <div className="flex space-x-3">
+            <div className="flex space-x-3 mb-4">
+
               <div className="mb-4">
                 <label htmlFor="filter" className="mr-2">
                   Filter By Status:
@@ -228,6 +330,21 @@ const Dashboard = () => {
                   className="border border-gray-300 rounded px-2 py-1"
                 />
               </div>
+              <div className="mb-4">
+                <label htmlFor="searchTransactionId" className="mr-2">
+                  Search By Transaction ID:
+                </label>
+                <input
+                  type="text"
+                  id="searchTransactionId"
+                  value={searchTransactionId}
+                  onChange={handleTransactionIdSearch}
+                  className="border border-gray-300 rounded px-2 py-1"
+                />
+              </div>
+              <button onClick={handleDeleteSelected} className="btn bg-base-300 hover:bg-red-600 btn-danger">
+                Delete Selected
+              </button>
             </div>
             <div className="table-container">
               {isLoading ? (
@@ -240,6 +357,12 @@ const Dashboard = () => {
                 <table className="table-auto w-full text-left border-collapse">
                   <thead>
                     <tr>
+                      <th className="p-4 border-b-2">
+                        <input
+                          type="checkbox"
+                          onChange={handleSelectAll}
+                        />
+                      </th>
                       <th className="p-4 border-b-2">Transaction#</th>
                       <th className="p-4 border-b-2">Status</th>
                       <th className="p-4 border-b-2">Date & Time</th>
@@ -252,6 +375,13 @@ const Dashboard = () => {
                   <tbody>
                     {currentTransactions.map((transaction, index) => (
                       <tr key={index}>
+                        <td className="p-4 border-b">
+                          <input
+                            type="checkbox"
+                            onChange={(e) => handleCheckboxChange(e, transaction.docId)}
+                            checked={selectedTransactionIds.includes(transaction.docId)}
+                          />
+                        </td>
                         <td
                           onClick={() =>
                             handleTransactionClick(transaction, transaction.docId)
@@ -320,7 +450,7 @@ const Dashboard = () => {
                         <div className="border-b border-gray-300 mb-2 pb-2">
                           <strong>Status:</strong>
                         </div>
-                        <div className="border-b border-gray-300 mb-2 pb-2">
+                        <div className="border-b border-gray-300 mb-2 p-3 pb-6">
                           <strong>Date & Time:</strong>
                         </div>
                         <div className="border-b border-gray-300 mb-2 pb-2">
@@ -328,6 +458,9 @@ const Dashboard = () => {
                         </div>
                         <div className="border-b border-gray-300 mb-2 pb-2">
                           <strong>Pin:</strong>
+                        </div>
+                        <div className="border-b border-gray-300 mb-2 pb-2">
+                          <strong>Transaction Id:</strong>
                         </div>
                         <div className="border-b border-gray-300 mb-2 pb-2">
                           <strong>Price:</strong>
@@ -339,6 +472,7 @@ const Dashboard = () => {
                         <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.dateTime}</div>
                         <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.number}</div>
                         <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.pin}</div>
+                        <div className="border-b border-gray-300 mb-2 pb-2">{selectedTransaction.transactionId}</div>
                         <div className="border-b border-gray-300 mb-2 pb-2">${selectedTransaction.price}</div>
                       </div>
                     </div>
@@ -357,13 +491,35 @@ const Dashboard = () => {
                       </select>
                     </div>
                     <button type="submit" className="btn btn-primary mt-4">Update Status</button>
-                    <button
-                      onClick={() => setModalOpen(false)}
-                      className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-                    >
-                      ✕
-                    </button>
                   </form>
+                  <form onSubmit={handleNoteSubmit}>
+                    <div className="flex flex-col mt-4">
+                      <label htmlFor="note" className="mr-2">Add Note:</label>
+                      <textarea
+                        id="note"
+                        value={newNote}
+                        onChange={handleNoteChange}
+                        className="border border-gray-300 rounded px-2 py-1"
+                      />
+                      <button type="submit" className="btn btn-primary mt-4">Add Note</button>
+                    </div>
+                  </form>
+                  <button
+                    onClick={() => setModalOpen(false)}
+                    className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                  >
+                    ✕
+                  </button>
+                  {selectedTransaction.notes && selectedTransaction.notes.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="font-semibold mb-2">Notes:</h3>
+                      <ul className="list-disc list-inside">
+                        {selectedTransaction.notes.map((note, index) => (
+                          <li key={index}>{note}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
