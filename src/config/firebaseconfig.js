@@ -1,13 +1,14 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyD1WrPiZAGZaIxgA69JQBU12-nvlxxEr0s",
-  authDomain: "billing-app-6d5a2.firebaseapp.com",
-  projectId: "billing-app-6d5a2",
-  storageBucket: "billing-app-6d5a2.appspot.com",
-  messagingSenderId: "316017112029",
-  appId: "1:316017112029:web:b23514d135e5706402bc34",
+  apiKey: "AIzaSyDzv1Ur24OneChlxAlmXW7zE8F8bCRSxnc",
+  authDomain: "test-baae8.firebaseapp.com",
+  projectId: "test-baae8",
+  storageBucket: "test-baae8.appspot.com",
+  messagingSenderId: "494348274469",
+  appId: "1:494348274469:web:d3dd3825a836ebcf71a8cc"
 };
 
 // Initialize Firebase
